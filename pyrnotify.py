@@ -77,9 +77,9 @@ Note:
 '''
 
 def escape(s):
-    return re.sub(r'([\\"\'])', r'\\\1',re.sub(r'<',r'&lt;',re.sub(r'&',r'&amp;',s)))
+    return re.sub(r'([\\"\'])', r'\\\1', s)
 
-def run_notify(icon, nick,chan,message):
+def run_notify(urgency, nick,chan,message):
     try:
         if w.config_is_set_plugin('socket'):
             s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -88,7 +88,7 @@ def run_notify(icon, nick,chan,message):
             host = w.config_get_plugin('host')
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((host, int(w.config_get_plugin('port'))))
-        s.send("normal %s \"%s to %s\" \"%s\"" % (socket.gethostname(), nick, escape(chan), escape(message)))
+        s.send("%s %s \"%s to %s\" \"%s\"" % (urgency, socket.gethostname(), nick, escape(chan), escape(message)))
         s.close()
     except Exception as e:
         w.prnt("", "Could not send notification: %s" % str(e))
@@ -97,12 +97,12 @@ def on_msg(*a):
     if len(a) == 8:
         data, buffer, timestamp, tags, displayed, highlight, sender, message = a
         if data == "private" or int(highlight):
-            if data == "private" and w.config_get_plugin('pm-icon'):
-                icon = w.config_get_plugin('pm-icon')
+            if data == "private":
+                urgency = "critical"
             else:
-                icon = w.config_get_plugin('icon')
+                urgency = "normal"
             buffer = "me" if data == "private" else w.buffer_get_string(buffer, "short_name")
-            run_notify(icon, sender, buffer, message)
+            run_notify(urgency, sender, buffer, message)
             #w.prnt("", str(a))
     return w.WEECHAT_RC_OK
 
