@@ -77,7 +77,11 @@ Note:
 '''
 
 def escape(s):
-    return re.sub(r'&',r'&amp;',re.sub(r'<',r'&lt;',s))
+    if '&' in s:
+        s = re.sub(r'&',r'&amp;',s)
+    if '<' in s:
+        s = re.sub(r'<',r'&lt;',s)
+    return s
 
 def run_notify(urgency, nick,chan,message):
     try:
