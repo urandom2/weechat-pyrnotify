@@ -76,13 +76,6 @@ Note:
 	socket or port must be forwarded to remote machine manually
 '''
 
-def escape(s):
-    if '&' in s:
-        s = re.sub(r'&',r'&amp;',s)
-    if '<' in s:
-        s = re.sub(r'<',r'&lt;',s)
-    return s
-
 def run_notify(urgency, nick,chan,message):
     try:
         if w.config_is_set_plugin('socket'):
@@ -92,7 +85,7 @@ def run_notify(urgency, nick,chan,message):
             host = w.config_get_plugin('host')
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((host, int(w.config_get_plugin('port'))))
-        s.send("%s %s \"%s to %s\" \"%s\"" % (urgency, socket.gethostname(), nick, escape(chan), escape(message)))
+        s.send("%s %s \"%s to %s\" \"%s\"" % (urgency, socket.gethostname(), nick, chan, message))
         s.close()
     except Exception as e:
         w.prnt("", "Could not send notification: %s" % str(e))
@@ -132,6 +125,14 @@ def weechat_script():
 ## This is where the client starts, except for the global if-check nothing below this line is
 ## supposed to be executed in weechat, instead it runs when the script is executed from
 ## commandline.
+
+def escape(s):
+    if '&' in s:
+        s = re.sub(r'&',r'&amp;',s)
+    if '<' in s:
+        s = re.sub(r'<',r'&lt;',s)
+    return s
+
 
 def accept_connections(s):
     conn, addr = s.accept()
